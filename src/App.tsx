@@ -1,53 +1,91 @@
 import * as react from "react";
-class TechBook {
-  constructor(
-    public title: string,
-    public url: string,
-    public author: string,
-    public num_comments: number,
-    public points: number,
-    public id: number
-  ) {}
-}
 
-const books: Array<TechBook> = new Array<TechBook>();
-books.push(
-  new TechBook("React", "https://reactjs.org", "Jordan Walke", 3, 4, 0)
-);
-books.push(
-  new TechBook(
-    "Redux",
-    "https://redux.js.org",
-    "Dan Abramov, Andrew Clark",
-    2,
-    5,
-    1
-  )
+type TechBook = {
+  id: number;
+  url: string;
+  title: string;
+  author: string;
+  num_comments: number;
+  points: number;
+};
+
+type TechBooks = TechBook[];
+
+type ListProps = {
+  list: TechBooks;
+};
+type ItemProps = {
+  item: TechBook;
+};
+
+const List: React.FC<ListProps> = (props) => (
+  <ul>
+    {props.list.map((book) => (
+      <Item key={book.id} item={book} />
+    ))}
+  </ul>
 );
 
-function App() {
+const Search = () => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(e);
+    console.log(e.target.value);
+  };
+  return (
+    <div>
+      <label htmlFor="search">Search: </label>
+      <input
+        className="text-input"
+        id="search"
+        type="text"
+        onChange={handleChange}
+      />
+    </div>
+  );
+};
+
+const App = () => {
+  const books = [
+    {
+      title: "React",
+      url: "https://reactjs.org/",
+      author: "Jordan Walke",
+      num_comments: 3,
+      points: 4,
+      id: 0,
+    },
+    {
+      title: "Redux",
+      url: "https://redux.js.org/",
+      author: "Dan Abramov, Andrew Clark",
+      num_comments: 2,
+      points: 5,
+      id: 1,
+    },
+  ];
+
   return (
     <div>
       <h1>Hacker Stories</h1>
 
-      <label htmlFor="search">Search: </label>
-      <input className="text-input" id="search" type="text" />
+      <Search />
 
       <hr />
-      <ul>
-        {books.map((book) => (
-          <li key={book.id}>
-            <span>
-              <a href={book.url}>{book.title}</a>
-            </span>
-            <span>{book.author}</span>
-            <span>{book.num_comments}</span>
-            <span>{book.points}</span>
-          </li>
-        ))}
-      </ul>
+
+      <List list={books} />
     </div>
   );
-}
+};
+
+const Item: React.FC<ItemProps> = (props) => (
+  <li>
+    <span>
+      <a href={props.item.url}>{props.item.title}</a>
+    </span>
+    <span>{props.item.author}</span>
+    <span>{props.item.num_comments}</span>
+    <span>{props.item.points}</span>
+  </li>
+);
 
 export default App;
