@@ -1,4 +1,4 @@
-import * as react from "react";
+import React from "react";
 
 type TechBook = {
   id: number;
@@ -18,19 +18,24 @@ type ItemProps = {
   item: TechBook;
 };
 
-const List: React.FC<ListProps> = (props) => (
-  <ul>
-    {props.list.map((book) => (
-      <Item key={book.id} item={book} />
-    ))}
-  </ul>
-);
+const List: React.FC<ListProps> = (props) => {
+  console.log("List rendered.");
+  return (
+    <ul>
+      {props.list.map((book) => (
+        <Item key={book.id} item={book} />
+      ))}
+    </ul>
+  );
+};
 
-const Search = () => {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e);
-    console.log(e.target.value);
-  };
+type SearchProps = {
+  search: string;
+  onSearch: (event: React.ChangeEvent<HTMLInputElement>) => void;
+};
+
+const Search: React.FC<SearchProps> = (props) => {
+  console.log("Search rendered.");
   return (
     <div>
       <label htmlFor="search">Search: </label>
@@ -38,7 +43,8 @@ const Search = () => {
         className="text-input"
         id="search"
         type="text"
-        onChange={handleChange}
+        value={props.search}
+        onChange={props.onSearch}
       />
     </div>
   );
@@ -63,29 +69,43 @@ const App = () => {
       id: 1,
     },
   ];
+  const [searchTerm, setSearchTerm] = React.useState("react");
+
+  console.log("App rendered.");
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const searchedBooks = books.filter((book) =>
+    book.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div>
       <h1>Hacker Stories</h1>
 
-      <Search />
+      <Search search={searchTerm} onSearch={handleSearch} />
 
       <hr />
 
-      <List list={books} />
+      <List list={searchedBooks} />
     </div>
   );
 };
 
-const Item: React.FC<ItemProps> = (props) => (
-  <li>
-    <span>
-      <a href={props.item.url}>{props.item.title}</a>
-    </span>
-    <span>{props.item.author}</span>
-    <span>{props.item.num_comments}</span>
-    <span>{props.item.points}</span>
-  </li>
-);
+const Item: React.FC<ItemProps> = (props) => {
+  console.log("Item rendered.");
+  return (
+    <li>
+      <span>
+        <a href={props.item.url}>{props.item.title}</a>
+      </span>
+      <span>{props.item.author}</span>
+      <span>{props.item.num_comments}</span>
+      <span>{props.item.points}</span>
+    </li>
+  );
+};
 
 export default App;
