@@ -44,6 +44,18 @@ const Search: React.FC<SearchProps> = ({ search, onSearch }) => (
   </div>
 );
 
+const useStorageState = (
+  key: string,
+  initialState: string
+): [string, (newValue: string) => void] => {
+  const [value, setValue] = React.useState(
+    localStorage.getItem(key) ?? initialState
+  );
+  React.useEffect(() => localStorage.setItem(key, value), [value, key]);
+
+  return [value, setValue];
+};
+
 const App = () => {
   const books = [
     {
@@ -63,7 +75,7 @@ const App = () => {
       id: 1,
     },
   ];
-  const [searchTerm, setSearchTerm] = React.useState("react");
+  const [searchTerm, setSearchTerm] = useStorageState("search", "React");
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
