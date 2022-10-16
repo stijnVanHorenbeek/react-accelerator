@@ -11,11 +11,89 @@ type TechBook = {
 
 type TechBooks = TechBook[];
 
+const useStorageState = (
+  key: string,
+  initialState: string
+): [string, (newValue: string) => void] => {
+  const [value, setValue] = React.useState(
+    localStorage.getItem(key) ?? initialState
+  );
+  React.useEffect(() => localStorage.setItem(key, value), [value, key]);
+
+  return [value, setValue];
+};
+
+const initialBooks = [
+  {
+    title: "React",
+    url: "https://reactjs.org/",
+    author: "Jordan Walke",
+    num_comments: 3,
+    points: 4,
+    id: 0,
+  },
+  {
+    title: "Redux",
+    url: "https://redux.js.org/",
+    author: "Dan Abramov, Andrew Clark",
+    num_comments: 2,
+    points: 5,
+    id: 1,
+  },
+];
+
+const getAsyncBooks = (): Promise<{ data: { books: TechBooks } }> =>
+  new Promise((resolve) =>
+    setTimeout(() => resolve({ data: { books: initialBooks } }), 2000)
+  );
+
+const App = () => {
+  const [searchTerm, setSearchTerm] = useStorageState("search", "React");
+
+  const [books, setBooks] = React.useState<TechBooks>([]);
+
+  React.useEffect(() => {
+    getAsyncBooks().then((result) => {
+      setBooks(result.data.books);
+    });
+  }, []);
+
+  const handleRemoveBook = (item: TechBook) => {
+    const newBooks = books.filter((book) => item.id != book.id);
+    setBooks(newBooks);
+  };
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const searchedBooks = books.filter((book) =>
+    book.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div>
+      <h1>Hacker Stories</h1>
+
+      <InputWithLabel
+        id="search"
+        value={searchTerm}
+        isFocused
+        onInputChange={handleSearch}
+      >
+        <strong>Search:</strong>
+      </InputWithLabel>
+      <hr />
+
+      <List list={searchedBooks} onRemoveItem={handleRemoveBook} />
+    </div>
+  );
+};
+
 type ListProps = {
   list: TechBooks;
   onRemoveItem: (item: TechBook) => void;
 };
-
 const List: React.FC<ListProps> = ({ list, onRemoveItem }) => (
   <ul>
     {list.map((item) => (
@@ -23,11 +101,6 @@ const List: React.FC<ListProps> = ({ list, onRemoveItem }) => (
     ))}
   </ul>
 );
-
-type SearchProps = {
-  search: string;
-  onSearch: (event: React.ChangeEvent<HTMLInputElement>) => void;
-};
 
 type InputWithLabelProps = {
   id: string;
@@ -66,72 +139,6 @@ const InputWithLabel: React.FC<InputWithLabelProps> = ({
         onChange={onInputChange}
       />
     </>
-  );
-};
-
-const useStorageState = (
-  key: string,
-  initialState: string
-): [string, (newValue: string) => void] => {
-  const [value, setValue] = React.useState(
-    localStorage.getItem(key) ?? initialState
-  );
-  React.useEffect(() => localStorage.setItem(key, value), [value, key]);
-
-  return [value, setValue];
-};
-
-const App = () => {
-  const initialBooks = [
-    {
-      title: "React",
-      url: "https://reactjs.org/",
-      author: "Jordan Walke",
-      num_comments: 3,
-      points: 4,
-      id: 0,
-    },
-    {
-      title: "Redux",
-      url: "https://redux.js.org/",
-      author: "Dan Abramov, Andrew Clark",
-      num_comments: 2,
-      points: 5,
-      id: 1,
-    },
-  ];
-  const [searchTerm, setSearchTerm] = useStorageState("search", "React");
-  const [books, setBooks] = React.useState(initialBooks);
-
-  const handleRemoveBook = (item: TechBook) => {
-    const newBooks = books.filter((book) => item.id != book.id);
-    setBooks(newBooks);
-  };
-
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
-  };
-
-  const searchedBooks = books.filter((book) =>
-    book.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  return (
-    <div>
-      <h1>Hacker Stories</h1>
-
-      <InputWithLabel
-        id="search"
-        value={searchTerm}
-        isFocused
-        onInputChange={handleSearch}
-      >
-        <strong>Search:</strong>
-      </InputWithLabel>
-      <hr />
-
-      <List list={searchedBooks} onRemoveItem={handleRemoveBook} />
-    </div>
   );
 };
 
