@@ -1,7 +1,7 @@
-import React from "react";
+import * as React from "react";
 
-type TechBook = {
-  id: number;
+type Story = {
+  objectID: string;
   url: string;
   title: string;
   author: string;
@@ -9,94 +9,114 @@ type TechBook = {
   points: number;
 };
 
-type TechBooks = TechBook[];
+type Stories = Story[];
+
+type StoriesState = {
+  data: Stories;
+  isLoading: boolean;
+  isError: boolean;
+};
+
+type StoriesFetchInitAction = {
+  type: "STORIES_FETCH_INIT";
+};
+
+type StoriesFetchSuccessAction = {
+  type: "STORIES_FETCH_SUCCESS";
+  payload: Stories;
+};
+
+type StoriesFetchFailureAction = {
+  type: "STORIES_FETCH_FAILURE";
+};
+
+type StoriesRemoveAction = {
+  type: "REMOVE_STORY";
+  payload: Story;
+};
+
+type StoriesAction =
+  | StoriesFetchInitAction
+  | StoriesFetchSuccessAction
+  | StoriesFetchFailureAction
+  | StoriesRemoveAction;
+
+const storiesReducer = (state: StoriesState, action: StoriesAction) => {
+  switch (action.type) {
+    case "STORIES_FETCH_INIT":
+      return {
+        ...state,
+        isLoading: true,
+        isError: false,
+      };
+    case "STORIES_FETCH_SUCCESS":
+      return {
+        ...state,
+        isLoading: false,
+        isError: false,
+        data: action.payload,
+      };
+    case "STORIES_FETCH_FAILURE":
+      return {
+        ...state,
+        isLoading: false,
+        isError: true,
+      };
+    case "REMOVE_STORY":
+      return {
+        ...state,
+        data: state.data.filter(
+          (story) => action.payload.objectID !== story.objectID
+        ),
+      };
+    default:
+      throw new Error();
+  }
+};
+
+const getAsyncStories = (): Promise<{ data: { stories: Stories } }> =>
+  new Promise((resolve, reject) => setTimeout(reject, 2000));
 
 const useStorageState = (
   key: string,
   initialState: string
 ): [string, (newValue: string) => void] => {
   const [value, setValue] = React.useState(
-    localStorage.getItem(key) ?? initialState
+    localStorage.getItem(key) || initialState
   );
-  React.useEffect(() => localStorage.setItem(key, value), [value, key]);
+
+  React.useEffect(() => {
+    localStorage.setItem(key, value);
+  }, [value, key]);
 
   return [value, setValue];
 };
 
-type BooksState = TechBooks;
-
-type TechBooksSetAction = {
-  type: "SET_BOOKS";
-  payload: TechBooks;
-};
-
-type TechBooksRemoveAction = {
-  type: "REMOVE_BOOK";
-  payload: TechBook;
-};
-
-type TechBooksAction = TechBooksSetAction | TechBooksRemoveAction;
-
-const booksReducer = (state: BooksState, action: TechBooksAction) => {
-  switch (action.type) {
-    case "SET_BOOKS":
-      return action.payload;
-    case "REMOVE_BOOK":
-      return state.filter((book: TechBook) => action.payload.id != book.id);
-    default:
-      throw new Error();
-  }
-};
-
-const initialBooks = [
-  {
-    title: "React",
-    url: "https://reactjs.org/",
-    author: "Jordan Walke",
-    num_comments: 3,
-    points: 4,
-    id: 0,
-  },
-  {
-    title: "Redux",
-    url: "https://redux.js.org/",
-    author: "Dan Abramov, Andrew Clark",
-    num_comments: 2,
-    points: 5,
-    id: 1,
-  },
-];
-
-const getAsyncBooks = (): Promise<{ data: { books: TechBooks } }> =>
-  new Promise((resolve) =>
-    setTimeout(() => resolve({ data: { books: initialBooks } }), 2000)
-  );
-
 const App = () => {
   const [searchTerm, setSearchTerm] = useStorageState("search", "React");
 
-  const [books, dispatchBooks] = React.useReducer(booksReducer, []);
-
-  const [isloading, setIsloading] = React.useState(false);
-
-  const [isError, setIsError] = React.useState(false);
+  const [stories, dispatchStories] = React.useReducer(storiesReducer, {
+    data: [],
+    isLoading: false,
+    isError: false,
+  });
 
   React.useEffect(() => {
-    setIsloading(true);
-    getAsyncBooks()
+    dispatchStories({ type: "STORIES_FETCH_INIT" });
+
+    getAsyncStories()
       .then((result) => {
-        dispatchBooks({
-          type: "SET_BOOKS",
-          payload: result.data.books,
+        dispatchStories({
+          type: "STORIES_FETCH_SUCCESS",
+          payload: result.data.stories,
         });
-        setIsloading(false);
       })
-      .catch(() => setIsError(true));
+      .catch(() => dispatchStories({ type: "STORIES_FETCH_FAILURE" }));
   }, []);
 
-  const handleRemoveBook = (item: TechBook) => {
-    dispatchBooks({
-      type: "REMOVE_BOOK",
+  const handleRemoveStory = (item: Story) => {
+    dispatchStories({
+      type: "REMOVE_STORY",
       payload: item,
     });
   };
@@ -105,8 +125,8 @@ const App = () => {
     setSearchTerm(event.target.value);
   };
 
-  const searchedBooks = books.filter((book: TechBook) =>
-    book.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const searchedStories = stories.data.filter((story: Story) =>
+    story.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -123,25 +143,25 @@ const App = () => {
       </InputWithLabel>
       <hr />
 
-      {isError && <p>Something went wrong...</p>}
+      {stories.isError && <p>Something went wrong...</p>}
 
-      {isloading ? (
+      {stories.isLoading ? (
         <p>Loading...</p>
       ) : (
-        <List list={searchedBooks} onRemoveItem={handleRemoveBook} />
+        <List list={searchedStories} onRemoveItem={handleRemoveStory} />
       )}
     </div>
   );
 };
 
 type ListProps = {
-  list: TechBooks;
-  onRemoveItem: (item: TechBook) => void;
+  list: Stories;
+  onRemoveItem: (item: Story) => void;
 };
 const List: React.FC<ListProps> = ({ list, onRemoveItem }) => (
   <ul>
     {list.map((item) => (
-      <Item key={item.id} item={item} onRemoveItem={onRemoveItem} />
+      <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
     ))}
   </ul>
 );
@@ -187,8 +207,8 @@ const InputWithLabel: React.FC<InputWithLabelProps> = ({
 };
 
 type ItemProps = {
-  item: TechBook;
-  onRemoveItem: (item: TechBook) => void;
+  item: Story;
+  onRemoveItem: (item: Story) => void;
 };
 
 const Item: React.FC<ItemProps> = ({ item, onRemoveItem }) => (
