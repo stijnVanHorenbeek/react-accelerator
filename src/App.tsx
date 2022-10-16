@@ -74,9 +74,6 @@ const storiesReducer = (state: StoriesState, action: StoriesAction) => {
   }
 };
 
-const getAsyncStories = (): Promise<{ data: { stories: Stories } }> =>
-  new Promise((resolve, reject) => setTimeout(reject, 2000));
-
 const useStorageState = (
   key: string,
   initialState: string
@@ -92,6 +89,8 @@ const useStorageState = (
   return [value, setValue];
 };
 
+const API_ENDPOINT = "https://hn.algolia.com/api/v1/search?query=";
+
 const App = () => {
   const [searchTerm, setSearchTerm] = useStorageState("search", "React");
 
@@ -104,11 +103,12 @@ const App = () => {
   React.useEffect(() => {
     dispatchStories({ type: "STORIES_FETCH_INIT" });
 
-    getAsyncStories()
+    fetch(`${API_ENDPOINT}react`)
+      .then((response) => response.json())
       .then((result) => {
         dispatchStories({
           type: "STORIES_FETCH_SUCCESS",
-          payload: result.data.stories,
+          payload: result.hits,
         });
       })
       .catch(() => dispatchStories({ type: "STORIES_FETCH_FAILURE" }));
@@ -125,13 +125,13 @@ const App = () => {
     setSearchTerm(event.target.value);
   };
 
-  const searchedStories = stories.data.filter((story: Story) =>
+  const searchedStories = stories.data.filter((story) =>
     story.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div>
-      <h1>Hacker Stories</h1>
+      <h1>My Hacker Stories</h1>
 
       <InputWithLabel
         id="search"
@@ -141,12 +141,13 @@ const App = () => {
       >
         <strong>Search:</strong>
       </InputWithLabel>
+
       <hr />
 
-      {stories.isError && <p>Something went wrong...</p>}
+      {stories.isError && <p>Something went wrong ...</p>}
 
       {stories.isLoading ? (
-        <p>Loading...</p>
+        <p>Loading ...</p>
       ) : (
         <List list={searchedStories} onRemoveItem={handleRemoveStory} />
       )}
@@ -154,24 +155,12 @@ const App = () => {
   );
 };
 
-type ListProps = {
-  list: Stories;
-  onRemoveItem: (item: Story) => void;
-};
-const List: React.FC<ListProps> = ({ list, onRemoveItem }) => (
-  <ul>
-    {list.map((item) => (
-      <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
-    ))}
-  </ul>
-);
-
 type InputWithLabelProps = {
   id: string;
   value: string;
   type?: string;
   onInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  isFocused?: boolean;
+  isFocused: boolean;
   children: React.ReactNode;
 };
 
@@ -196,15 +185,28 @@ const InputWithLabel: React.FC<InputWithLabelProps> = ({
       <label htmlFor={id}>{children}</label>
       &nbsp;
       <input
+        ref={inputRef}
         id={id}
         type={type}
         value={value}
-        ref={inputRef}
         onChange={onInputChange}
       />
     </>
   );
 };
+
+type ListProps = {
+  list: Stories;
+  onRemoveItem: (item: Story) => void;
+};
+
+const List: React.FC<ListProps> = ({ list, onRemoveItem }) => (
+  <ul>
+    {list.map((item) => (
+      <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
+    ))}
+  </ul>
+);
 
 type ItemProps = {
   item: Story;
