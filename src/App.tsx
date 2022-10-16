@@ -13,15 +13,13 @@ type TechBooks = TechBook[];
 
 type ListProps = {
   list: TechBooks;
-};
-type ItemProps = {
-  item: TechBook;
+  onRemoveItem: (item: TechBook) => void;
 };
 
-const List: React.FC<ListProps> = ({ list }) => (
+const List: React.FC<ListProps> = ({ list, onRemoveItem }) => (
   <ul>
     {list.map((item) => (
-      <Item key={item.id} item={item} />
+      <Item key={item.id} item={item} onRemoveItem={onRemoveItem} />
     ))}
   </ul>
 );
@@ -84,7 +82,7 @@ const useStorageState = (
 };
 
 const App = () => {
-  const books = [
+  const initialBooks = [
     {
       title: "React",
       url: "https://reactjs.org/",
@@ -103,6 +101,12 @@ const App = () => {
     },
   ];
   const [searchTerm, setSearchTerm] = useStorageState("search", "React");
+  const [books, setBooks] = React.useState(initialBooks);
+
+  const handleRemoveBook = (item: TechBook) => {
+    const newBooks = books.filter((book) => item.id != book.id);
+    setBooks(newBooks);
+  };
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -126,12 +130,17 @@ const App = () => {
       </InputWithLabel>
       <hr />
 
-      <List list={searchedBooks} />
+      <List list={searchedBooks} onRemoveItem={handleRemoveBook} />
     </div>
   );
 };
 
-const Item: React.FC<ItemProps> = ({ item }) => (
+type ItemProps = {
+  item: TechBook;
+  onRemoveItem: (item: TechBook) => void;
+};
+
+const Item: React.FC<ItemProps> = ({ item, onRemoveItem }) => (
   <li>
     <span>
       <a href={item.url}>{item.title}</a>
@@ -139,6 +148,11 @@ const Item: React.FC<ItemProps> = ({ item }) => (
     <span>{item.author}</span>
     <span>{item.num_comments}</span>
     <span>{item.points}</span>
+    <span>
+      <button type="button" onClick={() => onRemoveItem(item)}>
+        Dismiss
+      </button>
+    </span>
   </li>
 );
 
