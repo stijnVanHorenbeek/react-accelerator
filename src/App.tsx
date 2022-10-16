@@ -52,10 +52,18 @@ const App = () => {
 
   const [books, setBooks] = React.useState<TechBooks>([]);
 
+  const [isloading, setIsloading] = React.useState(false);
+
+  const [isError, setIsError] = React.useState(false);
+
   React.useEffect(() => {
-    getAsyncBooks().then((result) => {
-      setBooks(result.data.books);
-    });
+    setIsloading(true);
+    getAsyncBooks()
+      .then((result) => {
+        setBooks(result.data.books);
+        setIsloading(false);
+      })
+      .catch(() => setIsError(true));
   }, []);
 
   const handleRemoveBook = (item: TechBook) => {
@@ -85,7 +93,13 @@ const App = () => {
       </InputWithLabel>
       <hr />
 
-      <List list={searchedBooks} onRemoveItem={handleRemoveBook} />
+      {isError && <p>Something went wrong...</p>}
+
+      {isloading ? (
+        <p>Loading...</p>
+      ) : (
+        <List list={searchedBooks} onRemoveItem={handleRemoveBook} />
+      )}
     </div>
   );
 };
