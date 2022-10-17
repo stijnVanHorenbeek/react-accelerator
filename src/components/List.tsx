@@ -1,4 +1,5 @@
-import { ListProps } from "../ListProps";
+
+import { ListProps } from "../types/ListProps";
 import Item from "./Item";
 
 const List: React.FC<ListProps> = (props) => {

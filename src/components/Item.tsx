@@ -1,4 +1,4 @@
-import { ItemProps } from "../ItemProps";
+import { ItemProps } from "../types/ItemProps";
 
 const Item: React.FC<ItemProps> = (props) => {
     return (
