@@ -36,6 +36,7 @@ type InputWithLabelProps = {
   value: string;
   type?: string;
   onInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  isFocused?: boolean
   children: React.ReactNode;
 };
 
@@ -44,14 +45,16 @@ const InputWithLabel: React.FC<InputWithLabelProps> = ({
   value,
   type = "text",
   onInputChange,
+  isFocused,
   children,
-}) => (
+}) => {
+  return (
   <>
     <label htmlFor={id}>{children}</label>
     &nbsp;
-    <input id={id} type={type} value={value} onChange={onInputChange} />
+    <input id={id} type={type} value={value} onChange={onInputChange} autoFocus={isFocused} />
   </>
-);
+)};
 
 const useStorageState = (
   key: string,
@@ -102,6 +105,14 @@ const App = () => {
         id="search"
         value={searchTerm}
         onInputChange={handleSearch}
+      >
+        <strong>Search:</strong>
+      </InputWithLabel>
+      <InputWithLabel
+        id="search"
+        value={searchTerm}
+        onInputChange={handleSearch}
+        isFocused
       >
         <strong>Search:</strong>
       </InputWithLabel>
