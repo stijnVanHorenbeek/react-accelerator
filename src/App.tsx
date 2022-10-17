@@ -47,10 +47,34 @@ const getAsyncBooks = (): Promise<{ data: { books: TechBooks } }> =>
     setTimeout(() => resolve({ data: { books: initialBooks } }), 2000)
   );
 
+type BooksState = TechBooks;
+
+type TechBooksSetAction = {
+  type: "SET_BOOKS";
+  payload: TechBooks;
+};
+
+type TechBooksRemoveAction = {
+  type: "REMOVE_BOOK";
+  payload: TechBook;
+};
+
+type TechBooksAction = TechBooksSetAction | TechBooksRemoveAction;
+
+const booksReducer = (state: BooksState, action: TechBooksAction) => {
+  switch (action.type) {
+    case "SET_BOOKS":
+      return action.payload;
+    case "REMOVE_BOOK":
+      return state.filter((book: TechBook) => action.payload.id != book.id);
+    default:
+      throw new Error();
+  }
+};
 const App = () => {
   const [searchTerm, setSearchTerm] = useStorageState("search", "React");
 
-  const [books, setBooks] = React.useState<TechBooks>([]);
+  const [books, dispatchBooks] = React.useReducer(booksReducer, []);
 
   const [isloading, setIsloading] = React.useState(false);
 
@@ -60,22 +84,28 @@ const App = () => {
     setIsloading(true);
     getAsyncBooks()
       .then((result) => {
-        setBooks(result.data.books);
+        dispatchBooks({
+          type: "SET_BOOKS",
+          payload: result.data.books,
+        });
         setIsloading(false);
       })
       .catch(() => setIsError(true));
   }, []);
 
   const handleRemoveBook = (item: TechBook) => {
-    const newBooks = books.filter((book) => item.id != book.id);
-    setBooks(newBooks);
+    const newBooks = books.filter((book: TechBook) => item.id != book.id);
+    dispatchBooks({
+      type: "SET_BOOKS",
+      payload: newBooks,
+    });
   };
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
-  const searchedBooks = books.filter((book) =>
+  const searchedBooks = books.filter((book: TechBook) =>
     book.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
