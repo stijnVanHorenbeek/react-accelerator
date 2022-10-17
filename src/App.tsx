@@ -80,28 +80,39 @@ const useStorageState = (
 
   return [value, setValue];
 };
+const initialBooks = [
+  {
+    title: "React",
+    url: "https://reactjs.org/",
+    author: "Jordan Walke",
+    num_comments: 3,
+    points: 4,
+    id: 0,
+  },
+  {
+    title: "Redux",
+    url: "https://redux.js.org/",
+    author: "Dan Abramov, Andrew Clark",
+    num_comments: 2,
+    points: 5,
+    id: 1,
+  },
+];
 
+const getAsyncBooks = (): Promise<{ data: { books: TechBooks } }> =>
+new Promise((resolve) =>
+  setTimeout(() => resolve({ data: { books: initialBooks } }), 2000)
+);
 const App = () => {
-  const initialBooks = [
-    {
-      title: "React",
-      url: "https://reactjs.org/",
-      author: "Jordan Walke",
-      num_comments: 3,
-      points: 4,
-      id: 0,
-    },
-    {
-      title: "Redux",
-      url: "https://redux.js.org/",
-      author: "Dan Abramov, Andrew Clark",
-      num_comments: 2,
-      points: 5,
-      id: 1,
-    },
-  ];
+
   const [searchTerm, setSearchTerm] = useStorageState("search", "React");
-  const [books, setBooks] = React.useState(initialBooks);
+  const [books, setBooks] = React.useState<TechBooks>([]);
+
+  React.useEffect(() => {
+    getAsyncBooks().then((result) => {
+      setBooks(result.data.books);
+    });
+  }, []);
 
   const handleRemoveBook = (item: TechBook) => {
     const newBooks = books.filter((book) => item.id != book.id);
