@@ -4,7 +4,7 @@ const title = "React";
 function App() {
   return (
     <div>
-      <h1>{getGreeting("blaat")}</h1>
+      <h1>hacker stories</h1>
       <label htmlFor="search">Search</label>
       <input className="text-input" id="search" type="text" />
       <hr />
@@ -23,8 +23,6 @@ function App() {
 }
 
 export default App;
-
-const getGreeting = (title: string) => `Hello ${title}`;
 
 class TechBook {
   constructor(
