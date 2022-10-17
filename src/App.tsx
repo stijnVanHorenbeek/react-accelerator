@@ -26,22 +26,25 @@ const List: React.FC<ListProps> = ({ list }) => (
   </ul>
 );
 
-type SearchProps = {
-  search: string;
-  onSearch: (event: React.ChangeEvent<HTMLInputElement>) => void;
+type InputWithLabelProps = {
+  id: string;
+  value: string;
+  type?: string
+  onInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  children: React.ReactNode;
 };
 
-const Search: React.FC<SearchProps> = ({ search, onSearch }) => (
-  <div>
-    <label htmlFor="search">Search: </label>
+const InputWithLabel: React.FC<InputWithLabelProps> = ({ id, value, type ="text", onInputChange, children }) => (
+  <React.Fragment>
+    <label htmlFor={id}>Search: </label>
     <input
       className="text-input"
-      id="search"
-      type="text"
-      value={search}
-      onChange={onSearch}
+      id={id}
+      type={type}
+      value={value}
+      onChange={onInputChange}
     />
-  </div>
+  </React.Fragment>
 );
 
 const useStorageState = (
@@ -89,7 +92,9 @@ const App = () => {
     <div>
       <h1>Hacker Stories</h1>
 
-      <Search search={searchTerm} onSearch={handleSearch} />
+      <InputWithLabel id="search" value={searchTerm} onInputChange={handleSearch}>
+        <strong>Search:</strong>
+        </InputWithLabel>
 
       <hr />
 
