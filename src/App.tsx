@@ -49,15 +49,17 @@ const getAsyncBooks = (): Promise<{ data: { books: TechBooks } }> =>
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useStorageState("search", "React");
-
+  const [isLoading, setIsLoading] = React.useState(false);
   const [books, setBooks] = React.useState<TechBooks>([]);
+  const [isError, setError] = React.useState(false);
 
   React.useEffect(() => {
+    setIsLoading(true);
     getAsyncBooks().then((result) => {
       setBooks(result.data.books);
-    });
+      setIsLoading(false);
+    }).catch(() => setError(true));
   }, []);
-
   const handleRemoveBook = (item: TechBook) => {
     const newBooks = books.filter((book) => item.id != book.id);
     setBooks(newBooks);
@@ -84,8 +86,12 @@ const App = () => {
         <strong>Search:</strong>
       </InputWithLabel>
       <hr />
-
-      <List list={searchedBooks} onRemoveItem={handleRemoveBook} />
+      {isLoading ? (
+        <p>Loading</p>
+      ) : (
+        <List list={searchedBooks} onRemoveItem={handleRemoveBook} />
+      )}
+      { isError && <p>Something went wrong...</p>}
     </div>
   );
 };
