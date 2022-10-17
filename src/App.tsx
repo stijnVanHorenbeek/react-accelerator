@@ -18,37 +18,31 @@ type ItemProps = {
   item: TechBook;
 };
 
-const List: React.FC<ListProps> = (props) => {
-  console.log("List rendered.");
-  return (
-    <ul>
-      {props.list.map((book) => (
-        <Item key={book.id} item={book} />
-      ))}
-    </ul>
-  );
-};
+const List: React.FC<ListProps> = ({ list }) => (
+  <ul>
+    {list.map((book) => (
+      <Item key={book.id} item={book} />
+    ))}
+  </ul>
+);
 
 type SearchProps = {
   search: string;
   onSearch: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
-const Search: React.FC<SearchProps> = (props) => {
-  console.log("Search rendered.");
-  return (
-    <div>
-      <label htmlFor="search">Search: </label>
-      <input
-        className="text-input"
-        id="search"
-        type="text"
-        value={props.search}
-        onChange={props.onSearch}
-      />
-    </div>
-  );
-};
+const Search: React.FC<SearchProps> = ({ search, onSearch }) => (
+  <div>
+    <label htmlFor="search">Search: </label>
+    <input
+      className="text-input"
+      id="search"
+      type="text"
+      value={search}
+      onChange={onSearch}
+    />
+  </div>
+);
 
 const App = () => {
   const books = [
@@ -94,18 +88,15 @@ const App = () => {
   );
 };
 
-const Item: React.FC<ItemProps> = (props) => {
-  console.log("Item rendered.");
-  return (
-    <li>
-      <span>
-        <a href={props.item.url}>{props.item.title}</a>
-      </span>
-      <span>{props.item.author}</span>
-      <span>{props.item.num_comments}</span>
-      <span>{props.item.points}</span>
-    </li>
-  );
-};
+const Item: React.FC<ItemProps> = ({ item }) => (
+  <li>
+    <span>
+      <a href={item.url}>{item.title}</a>
+    </span>
+    <span>{item.author}</span>
+    <span>{item.num_comments}</span>
+    <span>{item.points}</span>
+  </li>
+);
 
 export default App;
