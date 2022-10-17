@@ -1,4 +1,5 @@
 import * as react from "react";
+import React from "react";
 
 type TechBook = {
   id: number;
@@ -18,6 +19,11 @@ type ItemProps = {
   item: TechBook;
 };
 
+type SearchProps = {
+  search: string;
+  onSearch: (event: React.ChangeEvent<HTMLInputElement>) => void;
+};
+
 const List: React.FC<ListProps> = (props) => (
   <ul>
     {props.list.map((book) => (
@@ -26,11 +32,8 @@ const List: React.FC<ListProps> = (props) => (
   </ul>
 );
 
-const Search = () => {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e);
-    console.log(e.target.value);
-  };
+const Search: React.FC<SearchProps> = (props) => {
+
   return (
     <div>
       <label htmlFor="search">Search: </label>
@@ -38,8 +41,12 @@ const Search = () => {
         className="text-input"
         id="search"
         type="text"
-        onChange={handleChange}
+        value={props.search}
+        onChange={props.onSearch}
       />
+      <p>
+        Searching for <strong>{props.search}</strong>
+      </p>
     </div>
   );
 };
@@ -64,11 +71,15 @@ const App = () => {
     },
   ];
 
+  const [searchTerm, setSearchTerm] = React.useState("react");
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(event.target.value);
+  }
   return (
     <div>
       <h1>Hacker Stories</h1>
 
-      <Search />
+      <Search onSearch={handleSearch} search={searchTerm} />
 
       <hr />
 
