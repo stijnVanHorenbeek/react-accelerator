@@ -1,53 +1,38 @@
-import * as react from "react";
-class TechBook {
-  constructor(
-    public title: string,
-    public url: string,
-    public author: string,
-    public num_comments: number,
-    public points: number,
-    public id: number
-  ) {}
-}
+import List from "./components/List";
+import Search from "./components/Search";
+import { TechBook } from "./types/TechBook";
+
 
 const books: Array<TechBook> = new Array<TechBook>();
-books.push(
-  new TechBook("React", "https://reactjs.org", "Jordan Walke", 3, 4, 0)
-);
-books.push(
-  new TechBook(
-    "Redux",
-    "https://redux.js.org",
-    "Dan Abramov, Andrew Clark",
-    2,
-    5,
-    1
-  )
-);
 
-function App() {
+const App = () => {
+  const books = [
+    {
+      title: "React",
+      url: "https://reactjs.org/",
+      author: "Jordan Walke",
+      num_comments: 3,
+      points: 4,
+      id: 0,
+    },
+    {
+      title: "Redux",
+      url: "https://redux.js.org/",
+      author: "Dan Abramov, Andrew Clark",
+      num_comments: 2,
+      points: 5,
+      id: 1,
+    },
+  ];
   return (
     <div>
       <h1>Hacker Stories</h1>
-
-      <label htmlFor="search">Search: </label>
-      <input className="text-input" id="search" type="text" />
+      <Search />
 
       <hr />
-      <ul>
-        {books.map((book) => (
-          <li key={book.id}>
-            <span>
-              <a href={book.url}>{book.title}</a>
-            </span>
-            <span>{book.author}</span>
-            <span>{book.num_comments}</span>
-            <span>{book.points}</span>
-          </li>
-        ))}
-      </ul>
+      <List list={books} />
     </div>
   );
-}
-
+};
 export default App;
+
